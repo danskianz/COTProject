@@ -13,12 +13,13 @@ using namespace std;
 string EncryptDES(string, string);
 string LeftMessage(string);
 string RightMessage(string);
-string FeistelSystem(string, string&);
+string FeistelSystem(string, string&, string&);
 void RightExpansion(string&);
-int RightExpansionBeta(string&);
+int RightExpansionBeta(string&, string&);
 void KeyPermutation1(string&);
 void LeftShift(string&);
 void KeyPermutation2(string&);
+string toBit(char);
 string XOR(string, string);
 
 //-- Function/Class Implementations
@@ -29,6 +30,7 @@ string EncryptDES(string message, string key) {
     string rightM;
     string tempM;
     srand(time(NULL));
+    string saltPile;
     // 0.1 Perform Initial Permutation??? (Note: This actually does not help)
     //... Skip for right now
     
@@ -41,7 +43,7 @@ string EncryptDES(string message, string key) {
     rightM = RightMessage(message);
 
     // 2. Perform Feistel System function on rightM, and key
-    string feistelM = FeistelSystem(rightM, key);
+    string feistelM = FeistelSystem(rightM, key, saltPile);
 //
 //    // 3. XOR Feistel System string 32 bit output with the current leftM 32 bit input (This now becomes the new left side)
 //    string tempLeft;
@@ -57,7 +59,8 @@ string EncryptDES(string message, string key) {
     return output;
 }
 
-string LeftMessage(string message) {
+string LeftMessage(string message) 
+{
     //cout <<"The size of the message string is " << message.size() << " 'bits'?" << endl;
     string output;
     
@@ -71,7 +74,8 @@ string LeftMessage(string message) {
     return output;
 }
 
-string RightMessage(string message) {
+string RightMessage(string message) 
+{
     string output;
     
     // This loop iterates through the message and stores only second half (rightM) into output
@@ -85,13 +89,13 @@ string RightMessage(string message) {
 }
 
 
-string FeistelSystem(string rightMessage, string& key) {
+string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 0. Declare Feistel temporary (local) variable(s)
     string output;
     
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
     //cout << "Expand(rightMessage): " << Expand(rightMessage) << endl;
-    RightExpansion(rightMessage);
+    RightExpansionBeta(rightMessage, saltPile);
     
 //    cout << "key:   " << key << endl;
     
@@ -124,7 +128,8 @@ string FeistelSystem(string rightMessage, string& key) {
 }
 
 //string Expand(string& right) {
-void RightExpansion(string& right) {
+void RightExpansion(string& right) 
+{
     string output;
     
     output.push_back(right[31]);
@@ -182,18 +187,32 @@ void RightExpansion(string& right) {
 //    return output;
 }
 
-int RightExpansionBeta(string& right)
+int RightExpansionBeta(string& right, string& sP)
 {
     
-    char salt1 = (rand() % 126) + 33;
-    char salt2 = (rand() % 126) + 33;
+    char salt1 = (rand() % 93) + 33;
+    char salt2 = (rand() % 93) + 33;
+    cout<<"r before append: "<<right<<endl;
+    sP.push_back(salt1);
+    sP.push_back(salt2);
+    string s1 = toBit(salt1);
+    string s2 = toBit(salt2);
+    
+
+    right += s1;
+    right += s2;
+
+    cout<<"r after append: "<< right<<endl;
+    
+
 
     
 }
 
 // KeyPermutation turns 64-bit key input into 56-bit permuted output
 // Should only occur (be called) once throughout the entire DES process
-void KeyPermutation1(string& key) {
+void KeyPermutation1(string& key) 
+{
     string output;
     
     output.push_back(key[56]);
@@ -261,7 +280,8 @@ void KeyPermutation1(string& key) {
     key = output;
 }
 
-void LeftShift(string& key) {
+void LeftShift(string& key) 
+{
     string output = key;
     string tempChar;
     
@@ -276,7 +296,8 @@ void LeftShift(string& key) {
     key = output;
 }
 
-void KeyPermutation2(string& key) {
+void KeyPermutation2(string& key)
+{
     static int round = 0;
     
     string output;
@@ -338,7 +359,8 @@ void KeyPermutation2(string& key) {
     key = output;
 }
 
-string XOR(string right, string key) {
+string XOR(string right, string key) 
+{
     string output;
     
     cout << "right:      " << right << endl;
@@ -357,6 +379,25 @@ string XOR(string right, string key) {
     cout << "xor output: " << output << endl;
     
     return output;
+}
+
+string toBit(char target) // for 8 bits only.
+{
+    string bitStream;
+    int x =  target;
+    for(int i = 7; i !=-1 ; --i)
+    {
+        if(pow(2, i) <= x)
+        {
+            bitStream.push_back(1+48);
+            x-= pow(2, i);
+        }
+        else
+            bitStream.push_back(0+48);
+
+    }
+    return bitStream;
+
 }
 
 #endif
