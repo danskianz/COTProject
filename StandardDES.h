@@ -29,33 +29,51 @@ string EncryptDES(string message, string key) {
     string leftM;
     string rightM;
     string tempM;
-    srand(time(NULL));
-    string saltPile;
+    
+    // Perform initial permutation on key to make it into 56-bit
+    KeyPermutation1(key);
+    
+    
     // 0.1 Perform Initial Permutation??? (Note: This actually does not help)
     //... Skip for right now
     
-    // 1. Split message string into left and right 32 bit strings
-   
-    // Call a left message function into 32-bit string
-    leftM = LeftMessage(message);
-   
-    // Call a right message function into 32-bit string
-    rightM = RightMessage(message);
+    
+    // Perform 16 round encryption
+    cout << "Begin 16 round loop!" << endl;
+    for (int i = 0; i < 16; i++) {
+        cout << "Round " << i << endl;
+        
+        // 1. Split message string into left and right 32 bit strings
+        cout << "\tSplit message (left & right)" << endl;
+        
+        // 1.1 Call a left message function into 32-bit string
+        leftM = LeftMessage(message);
+        cout << "\t   leftM =  " << leftM << endl;
+        
+        // 1.2 Call a right message function into 32-bit string
+        rightM = RightMessage(message);
+        cout << "\t   rightM = " << rightM << endl;
+        
+        // 2. Perform Feistel System function on rightM, and key
+        cout << "\n\tBegin Feistel System" << endl;
+        string feistelM = FeistelSystem(rightM, key);
+        
+        
+        // 3. XOR Feistel System string 32 bit output with the current leftM 32 bit input (This now becomes the new left side)
+        cout << "\n\tXOR Feistel System with leftM" << endl;
+        string tempM = XOR(leftM, feistelM);
+        cout << "\t   xor = " << tempM << endl;
+        
+        // 4. Turn old rightM into new leftM
+        leftM = rightM;
+        rightM = tempM;
+        
+        cin.ignore();
+    }
 
-    // 2. Perform Feistel System function on rightM, and key
-    string feistelM = FeistelSystem(rightM, key, saltPile);
-//
-//    // 3. XOR Feistel System string 32 bit output with the current leftM 32 bit input (This now becomes the new left side)
-//    string tempLeft;
-//    string tempRight;
-//
-//    // 4. Turn old rightM into new leftM
-//
-//    // 5. Repeat process 15 more times (16 total) (Note: loop only through steps 1-4)
-//    //      
-//    // 6. Perform Final Permutation??? (Note: This actually does not help)
-//    
-//    // 7. Return ciphertext string
+    // 5. Perform Final Permutation??? (Note: This actually does not help)
+    
+    // Return ciphertext string
     return output;
 }
 
@@ -94,36 +112,36 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     string output;
     
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
-    //cout << "Expand(rightMessage): " << Expand(rightMessage) << endl;
-    RightExpansionBeta(rightMessage, saltPile);
-    
-//    cout << "key:   " << key << endl;
+    cout << "\t1. Perform right expansion" << endl;
+    //RightExpansion(rightMessage);
+    RightExpansionBeta(rightMessage);
+    cout << "\t     rightM: " << rightMessage << endl;
     
     // 2. Mix/Shift key schedule
-    // 2.1 First original 64-bit key is Permuted once to turn it into a 56-bit key
-    KeyPermutation1(key);
-//    cout << "KeyP1: " << key << endl;
-    // 2.2.1 Split new 56-bit key into C & D each 28-bit
+    // 2.1 Split new 56-bit key into C & D each 28-bit
+    cout << "\t2. Perform key mixing schedule" << endl;
+    cout << "\t     key = " << key << endl;
+    
     string c = LeftMessage(key);
+    cout << "\t     c =   " << c << endl;
+    
     string d = RightMessage(key);
+    cout << "\t     d =   " << d << endl;
+    
     // 2.2 LeftShift (once or twice)
+    cout << "\t     Perform left shift on both 'c' and 'd'" << endl;
     LeftShift(c);
     LeftShift(d);
     
     // 2.3 Then Permute once again with either 1 or 2 shift (depending on ith iteration)
     string key2 = c + d;
     KeyPermutation2(key2);
-//    cout << "KeyP2: " << key2 << endl;
     // 2.1 XOR 48-bit rightMessage with new 48-bit key
     output = XOR(rightMessage, key2);
     
-    // 3. Divide new 48 bit string into 8 segments (6 bits each)
-
-    // 3.1 Perform S-Box Substitution with each of the 8 segments to create 8 new segments (4 bits each this time)
-
-    // 4. Append all of the 8 (4 bit) segments together and create a new 32 bit string (result of the Feistel System function which is later XORed with leftMessage)
-
-    // 5. Return new string output
+    // 3. Call new MagicFunction
+    
+    // 4. Return new string output
     return output;
 }
 
