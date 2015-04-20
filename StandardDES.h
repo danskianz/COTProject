@@ -171,11 +171,17 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 3. Call new MagicFunction
     cout << "\t     f. Call new mysterious Magic Function" << endl;
     cout << "\t        (Replacement for the S-Boxes)" << endl;
+    char outp[4];
+    outp[0] = output.at(0) ^ output.at(3) ^ output.at(5);
+    outp[1] = output.at(0) | output.at(2) | output.at(4);
+    outp[2] = output.at(1) ^ output.at(3) ^ output.at(5);
+    outp[3] = output.at(1) & output.at(2) & output.at(4);
+    string code(outp);
 
     
     // 4. Return new string output
     round++;
-    return output;
+    return code;
 }
 
 //string Expand(string& right) {
