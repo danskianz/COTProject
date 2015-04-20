@@ -117,8 +117,8 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
     cout << "\t1. Perform right expansion" << endl;
-    RightExpansion(rightMessage);
-//    RightExpansionBeta(rightMessage);
+    //RightExpansion(rightMessage);
+    RightExpansionBeta(rightMessage, saltPile);
     cout << "\t     rightM: " << rightMessage << endl;
     
     // 2. Mix/Shift key schedule
