@@ -29,6 +29,9 @@ string EncryptDES(string message, string key) {
     string leftM;
     string rightM;
     string tempM;
+    string saltPile;
+    
+    srand(time(NULL));
     
     // Perform initial permutation on key to make it into 56-bit
     KeyPermutation1(key);
@@ -48,15 +51,15 @@ string EncryptDES(string message, string key) {
         
         // 1.1 Call a left message function into 32-bit string
         leftM = LeftMessage(message);
-        cout << "\t   leftM =  " << leftM << endl;
+        cout << "\t  leftM =  " << leftM << endl;
         
         // 1.2 Call a right message function into 32-bit string
         rightM = RightMessage(message);
-        cout << "\t   rightM = " << rightM << endl;
+        cout << "\t  rightM = " << rightM << endl;
         
         // 2. Perform Feistel System function on rightM, and key
         cout << "\n\tBegin Feistel System" << endl;
-        string feistelM = FeistelSystem(rightM, key);
+        string feistelM = FeistelSystem(rightM, key, saltPile);
         
         
         // 3. XOR Feistel System string 32 bit output with the current leftM 32 bit input (This now becomes the new left side)
@@ -113,8 +116,8 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
     cout << "\t1. Perform right expansion" << endl;
-    //RightExpansion(rightMessage);
-    RightExpansionBeta(rightMessage);
+    RightExpansion(rightMessage);
+//    RightExpansionBeta(rightMessage);
     cout << "\t     rightM: " << rightMessage << endl;
     
     // 2. Mix/Shift key schedule
@@ -130,11 +133,17 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     
     // 2.2 LeftShift (once or twice)
     cout << "\t     Perform left shift on both 'c' and 'd'" << endl;
+
     LeftShift(c);
+    cout << "\t     c =   " << c << endl;
+
     LeftShift(d);
+    cout << "\t     d =   " << d << endl;
+    
     
     // 2.3 Then Permute once again with either 1 or 2 shift (depending on ith iteration)
-    string key2 = c + d;
+    key = c + d;
+    string key2 = key;
     KeyPermutation2(key2);
     // 2.1 XOR 48-bit rightMessage with new 48-bit key
     output = XOR(rightMessage, key2);
@@ -200,9 +209,6 @@ void RightExpansion(string& right)
     output.push_back(right[0]);
     
     right = output;
-//    cout << "32-bit output --> 48-bit output: " << endl << output << endl;
-//    cout << "output size: " << output.size() << endl;
-//    return output;
 }
 
 int RightExpansionBeta(string& right, string& sP)
@@ -293,8 +299,6 @@ void KeyPermutation1(string& key)
     output.push_back(key[11]);
     output.push_back(key[3]);
     
-//    cout << "Permuted Key: " << output << endl;
-//    cout << "output.size(): " << output.size() << endl;
     key = output;
 }
 
@@ -303,13 +307,9 @@ void LeftShift(string& key)
     string output = key;
     string tempChar;
     
-//    cout << "Key: " << output << endl;
-//    cout << "key.size(): " << output.size() << endl;
     tempChar = output.front();
     output.erase(0,1);
     output = output + tempChar;
-//    cout << "Key: " << output << endl;
-//    cout << "key.size(): " << output.size() << endl;
     
     key = output;
 }
@@ -372,8 +372,6 @@ void KeyPermutation2(string& key)
     output.push_back(key[28]);
     output.push_back(key[31]);
 
-    //    cout << "Permuted Key: " << output << endl;
-    //    cout << "output.size(): " << output.size() << endl;
     key = output;
 }
 
@@ -381,20 +379,14 @@ string XOR(string right, string key)
 {
     string output;
     
-    cout << "right:      " << right << endl;
-    cout << "key:        " << key << endl;
-    
-    for (int i = 0; i < 48; i++) {
+    for (int i = 0; i < key.length(); i++) {
         if ((right[i] == key[i]) || (right[i] == '0' && key[i] == '0')) {
             output = output + "0";
         }
         else {
             output = output + "1";
         }
-//        output = output + [(right[i] ^ key[i]);
     }
-    
-    cout << "xor output: " << output << endl;
     
     return output;
 }
