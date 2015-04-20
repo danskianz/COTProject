@@ -113,6 +113,7 @@ string RightMessage(string message)
 string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 0. Declare Feistel temporary (local) variable(s)
     string output;
+    static int round = 0;
     
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
     cout << "\t1. Perform right expansion" << endl;
@@ -126,18 +127,28 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     cout << "\t     key = " << key << endl;
     
     string c = LeftMessage(key);
+
+    cout << "\t     Pre left shift on both 'c' and 'd'" << endl;
+    
     cout << "\t     c =   " << c << endl;
     
     string d = RightMessage(key);
     cout << "\t     d =   " << d << endl;
     
     // 2.2 LeftShift (once or twice)
-    cout << "\t     Perform left shift on both 'c' and 'd'" << endl;
-
-    LeftShift(c);
+    cout << "\t     Post left shift on both 'c' and 'd'" << endl;
+    cout << "\t     (Note: shift once if round is 0,1,8,15)" << endl;
+    if (round == 0 || round == 1 || round == 8 || round == 15) {
+        LeftShift(c);
+        LeftShift(d);
+    }
+    else {
+        LeftShift(c);
+        LeftShift(c);
+        LeftShift(d);
+        LeftShift(d);
+    }
     cout << "\t     c =   " << c << endl;
-
-    LeftShift(d);
     cout << "\t     d =   " << d << endl;
     
     
@@ -151,6 +162,7 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 3. Call new MagicFunction
     
     // 4. Return new string output
+    round++;
     return output;
 }
 
