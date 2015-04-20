@@ -128,16 +128,16 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     
     string c = LeftMessage(key);
 
-    cout << "\t     Pre left shift on both 'c' and 'd'" << endl;
+    cout << "\t     a. Pre left shift on both 'c' and 'd'" << endl;
     
-    cout << "\t     c =   " << c << endl;
+    cout << "\t        c =   " << c << endl;
     
     string d = RightMessage(key);
-    cout << "\t     d =   " << d << endl;
+    cout << "\t        d =   " << d << endl;
     
     // 2.2 LeftShift (once or twice)
-    cout << "\t     Post left shift on both 'c' and 'd'" << endl;
-    cout << "\t     (Note: shift once if round is 0,1,8,15)" << endl;
+    cout << "\t     b. Post left shift on both 'c' and 'd'" << endl;
+    cout << "\t        (Note: shift once if round is 0,1,8,15 and twice otherwise)" << endl;
     if (round == 0 || round == 1 || round == 8 || round == 15) {
         LeftShift(c);
         LeftShift(d);
@@ -148,18 +148,30 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
         LeftShift(d);
         LeftShift(d);
     }
-    cout << "\t     c =   " << c << endl;
-    cout << "\t     d =   " << d << endl;
+    cout << "\t        c =   " << c << endl;
+    cout << "\t        d =   " << d << endl;
     
     
     // 2.3 Then Permute once again with either 1 or 2 shift (depending on ith iteration)
+    cout << "\t     c. Shifted key (c + d)" << endl;
     key = c + d;
+    cout << "\t        key = " << key << endl;
     string key2 = key;
     KeyPermutation2(key2);
+    cout << "\t     d. Permuted key" << endl;
+    cout << "\t        key = " << key2 << endl;
+    
     // 2.1 XOR 48-bit rightMessage with new 48-bit key
+    cout << "\t     e. XOR rightM with new 48-bit key" << endl;
     output = XOR(rightMessage, key2);
+    cout << "\t        key    = " << rightMessage << endl;
+    cout << "\t        rightM = " << key2 << endl;
+    cout << "\t        xor    = " << output << endl;
     
     // 3. Call new MagicFunction
+    cout << "\t     f. Call new mysterious Magic Function" << endl;
+    cout << "\t        (Replacement for the S-Boxes)" << endl;
+
     
     // 4. Return new string output
     round++;
