@@ -21,6 +21,8 @@ void LeftShift(string&);
 void KeyPermutation2(string&);
 string toBit(char);
 string XOR(string, string);
+string OR(string, string);
+string AND(string, string);
 
 //-- Function/Class Implementations
 string EncryptDES(string message, string key) {
@@ -60,7 +62,7 @@ string EncryptDES(string message, string key) {
         // 2. Perform Feistel System function on rightM, and key
         cout << "\n\tBegin Feistel System" << endl;
         string feistelM = FeistelSystem(rightM, key, saltPile);
-        
+       // cout<<feistelM.length()<<endl; 
         
         // 3. XOR Feistel System string 32 bit output with the current leftM 32 bit input (This now becomes the new left side)
         cout << "\n\tXOR Feistel System with leftM" << endl;
@@ -117,8 +119,8 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
     cout << "\t1. Perform right expansion" << endl;
-    RightExpansion(rightMessage);
-//    RightExpansionBeta(rightMessage);
+    //RightExpansion(rightMessage);
+    RightExpansionBeta(rightMessage, saltPile);
     cout << "\t     rightM: " << rightMessage << endl;
     
     // 2. Mix/Shift key schedule
@@ -171,11 +173,39 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 3. Call new MagicFunction
     cout << "\t     f. Call new mysterious Magic Function" << endl;
     cout << "\t        (Replacement for the S-Boxes)" << endl;
-
     
+    /*
+    char outp[4];
+    outp[0] = output.at(0) ^ output.at(3) ^ output.at(5);
+    outp[1] = output.at(0) | output.at(2) | output.at(4);
+    outp[2] = output.at(1) ^ output.at(3) ^ output.at(5);
+    outp[3] = output.at(1) & output.at(2) & output.at(4);
+    string code(outp);
+    */
+    string output2 = "";
+    for(int i = 0; i < 8; ++i)
+    {
+        output2 += XOR(XOR(output.substr(0, 1),output.substr(3, 1)), output.substr(5, 1));
+    }
+    for(int i = 8; i < 16; ++i)
+    {
+        output2 += OR(OR(output.substr(0, 1), output.substr(2, 1)), output.substr(4, 1));
+    }
+    for(int i = 16; i < 24; ++i)
+    {
+        output2 += XOR(XOR(output.substr(1, 1), output.substr(3, 1)), output.substr(5, 1));
+    }
+    for(int i = 24; i < 32; ++i)
+    {
+        output2 += AND(AND(output.substr(1, 1), output.substr(2, 1)), output.substr(4, 1));
+    }
+
+
+
+
     // 4. Return new string output
     round++;
-    return output;
+    return output;//code;
 }
 
 //string Expand(string& right) {
@@ -399,19 +429,48 @@ void KeyPermutation2(string& key)
     key = output;
 }
 
-string XOR(string right, string key) 
+string XOR(string string1, string string2) 
 {
     string output;
     
-    for (int i = 0; i < key.length(); i++) {
-        if ((right[i] == key[i]) || (right[i] == '0' && key[i] == '0')) {
-            output = output + "0";
+    for (int i = 0; i < string1.length(); i++) 
+    {
+        if ((string1[i] == string2[i]) || (string1[i] == '0' && string2[i] == '0')) {
+            output += '0';
         }
         else {
-            output = output + "1";
+            output += "1";
         }
     }
     
+    return output;
+}
+
+string OR(string string1, string string2)
+{
+    string output;
+
+    for(int i = 0; i < string1.length(); ++i)
+    {
+        if(string1[i] == '0' && string2[i] == '0')
+            output += "0";
+        else
+            output += "1";
+    }
+    return output;
+}
+
+string AND(string string1, string string2)
+{
+    string output;
+
+    for(int i = 0; i < string1.length(); ++i)
+    {
+        if(string1[i] == '1' && string2[i] == '1')
+            output += "1";
+        else
+            output += "0";
+    }
     return output;
 }
 
