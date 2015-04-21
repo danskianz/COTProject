@@ -11,6 +11,7 @@ using namespace std;
 
 //-- Function/Class Declarations
 string EncryptDES(string, string);
+string DecryptDES(string, string);
 string LeftMessage(string);
 string RightMessage(string);
 string FeistelSystem(string, string&, string&);
@@ -44,9 +45,9 @@ string EncryptDES(string message, string key) {
     
     
     // Perform 16 round encryption
-    cout << "Begin 16 round loop!" << endl;
+    cout << "Begin 16 round encryption loop!" << endl;
     for (int i = 0; i < 16; i++) {
-        cout << "Round " << i << endl;
+        cout << "*********************************** Round " << i << " ***********************************" << endl;
         
         // 1. Split message string into left and right 32 bit strings
         cout << "\tSplit message (left & right)" << endl;
@@ -67,19 +68,61 @@ string EncryptDES(string message, string key) {
         // 3. XOR Feistel System string 32 bit output with the current leftM 32 bit input (This now becomes the new left side)
         cout << "\n\tXOR Feistel System with leftM" << endl;
         string tempM = XOR(leftM, feistelM);
-        cout << "\t   xor = " << tempM << endl;
+        cout << "\t   leftM =    " << leftM << endl;
+        cout << "\t   feistelM = " << feistelM << endl;
+        cout << "\t   xor =      " << tempM << endl;
         
         // 4. Turn old rightM into new leftM
         leftM = rightM;
         rightM = tempM;
         
+        // 5. Merge new left & right together
+        cout << "old message: " << message << endl;
+        message = leftM + rightM;
+        cout << "new message: " << message << endl;
+        
         cin.ignore();
     }
-
+    
+    cout << "*******************************************************************************" << endl;
     // 5. Perform Final Permutation??? (Note: This actually does not help)
     
     // Return ciphertext string
     return output;
+}
+
+string DecryptDES(string, string)
+{
+    // 0. Declare output (local) variable(s)
+    string output;
+    string leftM;
+    string rightM;
+    string tempM;
+    string saltPile;
+    
+    srand(time(NULL));
+    
+    // Perform initial permutation on key to make it into 56-bit
+    KeyPermutation1(key);
+    
+    
+    // 0.1 Perform Initial Permutation??? (Note: This actually does not help)
+    //... Skip for right now
+    
+    // First thing to note is that l1d = r15e and r1d =r1d = l15e
+    
+    
+    // Perform 15 round decryption
+    cout << "Begin 15 round decryption loop!" << endl;
+    for (int i = 0; i < 15; i++) {
+        cout << "*********************************** Round " << i << " ***********************************" << endl;
+        // 1. Split message string into left and right 32 bit strings
+        cout << "\tSplit message (left & right)" << endl;
+        
+        // 1.1 Call a left message function into 32-bit string
+        leftM = LeftMessage(message);
+        cout << "\t  leftM =  " << leftM << endl;
+        
 }
 
 string LeftMessage(string message) 
@@ -88,7 +131,7 @@ string LeftMessage(string message)
     string output;
     
     // This loop iterates through the message and stores only first half (leftM) into output
-    for (int index = 0 ; index < (message.size() / 2); index++)
+    for (int index = 0; index < (message.size() / 2); index++)
     {
         output += message[index];
     }
@@ -120,13 +163,19 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 1. Expand rightMessage from 32 bits to 48 bits (E-Box Substitution)
     cout << "\t1. Perform right expansion" << endl;
     //RightExpansion(rightMessage);
+    cout << "\t     a. Pre right expansion" << endl;
+    cout << "\t        rightM: " << rightMessage << endl;
     RightExpansionBeta(rightMessage, saltPile);
-    cout << "\t     rightM: " << rightMessage << endl;
+    //RightExpansion(rightMessage);
+    cout << "\t     b. Post right expansion" << endl;
+    cout << "\t        rightM: " << rightMessage << endl;
     
     // 2. Mix/Shift key schedule
     // 2.1 Split new 56-bit key into C & D each 28-bit
     cout << "\t2. Perform key mixing schedule" << endl;
-    cout << "\t     key = " << key << endl;
+    cout << endl;
+    cout << "\t     key1 = " << key << endl;
+    cout << endl;
     
     string c = LeftMessage(key);
 
@@ -157,22 +206,22 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
     // 2.3 Then Permute once again with either 1 or 2 shift (depending on ith iteration)
     cout << "\t     c. Shifted key (c + d)" << endl;
     key = c + d;
-    cout << "\t        key = " << key << endl;
+    cout << "\t        key2 = " << key << endl;
     string key2 = key;
     KeyPermutation2(key2);
     cout << "\t     d. Permuted key" << endl;
-    cout << "\t        key = " << key2 << endl;
+    cout << "\t        key3 = " << key2 << endl;
     
     // 2.1 XOR 48-bit rightMessage with new 48-bit key
     cout << "\t     e. XOR rightM with new 48-bit key" << endl;
     output = XOR(rightMessage, key2);
-    cout << "\t        key    = " << rightMessage << endl;
-    cout << "\t        rightM = " << key2 << endl;
+    cout << "\t        key3   = " << key2 << endl;
+    cout << "\t        rightM = " << rightMessage << endl;
     cout << "\t        xor    = " << output << endl;
     
     // 3. Call new MagicFunction
-    cout << "\t     f. Call new mysterious Magic Function" << endl;
-    cout << "\t        (Replacement for the S-Boxes)" << endl;
+    cout << "\t3. Call new mysterious Magic Function" << endl;
+    cout << "\t   (Replacement for the S-Boxes)" << endl;
     
     /*
     char outp[4];
@@ -200,12 +249,14 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
         output2 += AND(AND(output.substr(1, 1), output.substr(2, 1)), output.substr(4, 1));
     }
 
-
-
+    cout << "\t     a. Result prior to Magic Function" << endl;
+    cout << "\t        xor =         " << output << endl;
+    cout << "\t     b. Result prior to Magic Function" << endl;
+    cout << "\t        feistelM =    " << output2 << endl;
 
     // 4. Return new string output
     round++;
-    return output;//code;
+    return output2;//code;
 }
 
 //string Expand(string& right) {
@@ -270,7 +321,7 @@ int RightExpansionBeta(string& right, string& sP)
     
     char salt1 = (rand() % 93) + 33;
     char salt2 = (rand() % 93) + 33;
-    cout<<"r before append: "<<right<<endl;
+    //cout<<"r before append: "<<right<<endl;
     sP.push_back(salt1);
     sP.push_back(salt2);
     string s1 = toBit(salt1);
@@ -280,11 +331,9 @@ int RightExpansionBeta(string& right, string& sP)
     right += s1;
     right += s2;
 
-    cout<<"r after append: "<< right<<endl;
+    //cout<<"r after append: "<< right<<endl;
     
-
-
-    
+    return 0;
 }
 
 // KeyPermutation turns 64-bit key input into 56-bit permuted output
