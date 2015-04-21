@@ -205,7 +205,7 @@ string FeistelSystem(string rightMessage, string& key, string& saltPile) {
 
     // 4. Return new string output
     round++;
-    return output;//code;
+    return output2;//code;
 }
 
 //string Expand(string& right) {
