@@ -90,8 +90,8 @@ string EncryptDES(string message, string key) {
     // Return ciphertext string
     return output;
 }
-
-string DecryptDES(string, string)
+/*
+string DecryptDES(string, string, )
 {
     // 0. Declare output (local) variable(s)
     string output;
@@ -124,7 +124,7 @@ string DecryptDES(string, string)
         cout << "\t  leftM =  " << leftM << endl;
         
 }
-
+*/
 string LeftMessage(string message) 
 {
     //cout <<"The size of the message string is " << message.size() << " 'bits'?" << endl;
@@ -322,8 +322,8 @@ int RightExpansionBeta(string& right, string& sP)
     char salt1 = (rand() % 93) + 33;
     char salt2 = (rand() % 93) + 33;
     //cout<<"r before append: "<<right<<endl;
-    sP.push_back(salt1);
-    sP.push_back(salt2);
+    sP += salt1;
+    sP += salt2;
     string s1 = toBit(salt1);
     string s2 = toBit(salt2);
     
